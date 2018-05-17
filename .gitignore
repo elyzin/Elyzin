@@ -24,3 +24,6 @@ Thumbs.db
 
 # Generic git files
 *.orig
+
+# Package Helpers
+module/simulate.php

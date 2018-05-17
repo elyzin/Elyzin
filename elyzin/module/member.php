@@ -4,7 +4,7 @@
  * 
  * @since 0.1.0
  * @version 0.1.0
- * @package Module : Admin
+ * @package Module : Member
  * @author Elyzin Devs <devs@elyz.in>
  * @source https://github.com/elyzin/elyzin Base repository
  * @link http://elyz.in

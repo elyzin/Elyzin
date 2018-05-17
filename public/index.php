@@ -1,4 +1,18 @@
 <?php
+/**
+ * Elyzin - PHP based free forum software
+ * 
+ * @since 0.1.0
+ * @version 0.1.0
+ * @package Root file
+ * @author Elyzin Devs <devs@elyz.in>
+ * @source https://github.com/elyzin/elyzin Base repository
+ * @link http://elyz.in
+ * @copyright 2018 Elyzin
+ * @license MIT
+ * 
+ * @todo Router
+ */
 
 $pagegen = microtime(true); // Page generation time start
 
