@@ -26,4 +26,4 @@ Thumbs.db
 *.orig
 
 # Package Helpers
-module/simulate.php
+simulate.php
