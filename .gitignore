@@ -26,4 +26,4 @@ Thumbs.db
 *.orig
 
 # Package Helpers
-simulate.php
+elyzin/modules/simulate.php
