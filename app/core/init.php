@@ -49,4 +49,5 @@ $file 	= new file();
 $clock 	= new clock();
 $log	= new log();
 $page 	= new page();
+
 $page->pagegen = $pagegen; // Transfer page generation start time to page class	

@@ -17,11 +17,10 @@
 $pagegen = microtime(true); // Page generation time start
 
 // Define site constants
-define('APP', 'elyzin'); // Variable for denying direct access, ensure rooting from index only // CAN IT BE TAKEN FROM DOMAIN?
 define('DEV', ($_SERVER['HTTP_HOST'] === 'localhost'));
 define('DRT', dirname(__DIR__) . DIRECTORY_SEPARATOR); // Directory Root
 define('VRT', dirname(__FILE__) . DIRECTORY_SEPARATOR); // View Root (public)
-define('ART', DRT . APP . DIRECTORY_SEPARATOR); // Application Root
+define('ART', DRT . 'app' . DIRECTORY_SEPARATOR); // Application Root
 define('PRT', '//' . preg_replace('/[\/]{2}/', '/', $_SERVER['HTTP_HOST'] . dirname(explode('index.php', $_SERVER['PHP_SELF'])[0]) . '/')); // Public web root
 
 // Process url request at the first place

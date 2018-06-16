@@ -1,0 +1,8 @@
+{
+    "config": {
+        "vendor-dir": "app/core/class"
+    },
+    "require": {
+        "izniburak/pdox": "^1"
+    }
+}
