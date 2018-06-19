@@ -1,0 +1,28 @@
+<?php
+//auto generated on 19-06-2018, 09:04:16 (Europe/Berlin)
+
+return array (
+  0 => 'D:\\OneDrive\\Coding\\Siteroots\\elyzin\\public\\.',
+  1 => 'D:\\OneDrive\\Coding\\Siteroots\\elyzin\\public\\..',
+  2 => 'D:\\OneDrive\\Coding\\Siteroots\\elyzin\\public\\.htaccess',
+  3 => 'D:\\OneDrive\\Coding\\Siteroots\\elyzin\\public\\index.php',
+  4 => 'D:\\OneDrive\\Coding\\Siteroots\\elyzin\\public\\theme\\.',
+  5 => 'D:\\OneDrive\\Coding\\Siteroots\\elyzin\\public\\theme\\..',
+  6 => 'D:\\OneDrive\\Coding\\Siteroots\\elyzin\\public\\theme\\default\\.',
+  7 => 'D:\\OneDrive\\Coding\\Siteroots\\elyzin\\public\\theme\\default\\..',
+  8 => 'D:\\OneDrive\\Coding\\Siteroots\\elyzin\\public\\theme\\default\\font\\.',
+  9 => 'D:\\OneDrive\\Coding\\Siteroots\\elyzin\\public\\theme\\default\\font\\..',
+  10 => 'D:\\OneDrive\\Coding\\Siteroots\\elyzin\\public\\theme\\default\\image\\.',
+  11 => 'D:\\OneDrive\\Coding\\Siteroots\\elyzin\\public\\theme\\default\\image\\..',
+  12 => 'D:\\OneDrive\\Coding\\Siteroots\\elyzin\\public\\theme\\default\\script\\.',
+  13 => 'D:\\OneDrive\\Coding\\Siteroots\\elyzin\\public\\theme\\default\\script\\..',
+  14 => 'D:\\OneDrive\\Coding\\Siteroots\\elyzin\\public\\theme\\default\\script\\base.js',
+  15 => 'D:\\OneDrive\\Coding\\Siteroots\\elyzin\\public\\theme\\default\\style\\.',
+  16 => 'D:\\OneDrive\\Coding\\Siteroots\\elyzin\\public\\theme\\default\\style\\..',
+  17 => 'D:\\OneDrive\\Coding\\Siteroots\\elyzin\\public\\theme\\default\\style\\css\\.',
+  18 => 'D:\\OneDrive\\Coding\\Siteroots\\elyzin\\public\\theme\\default\\style\\css\\..',
+  19 => 'D:\\OneDrive\\Coding\\Siteroots\\elyzin\\public\\theme\\default\\style\\scss\\.',
+  20 => 'D:\\OneDrive\\Coding\\Siteroots\\elyzin\\public\\theme\\default\\style\\scss\\..',
+  21 => 'D:\\OneDrive\\Coding\\Siteroots\\elyzin\\public\\vendor\\.',
+  22 => 'D:\\OneDrive\\Coding\\Siteroots\\elyzin\\public\\vendor\\..',
+);
