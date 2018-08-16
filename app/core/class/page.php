@@ -1,24 +1,27 @@
 <?php
 
-class page
+class Page
 {
 	public $name = 'Home';
-	private $pgen = 0;
 	protected $html = "";
 	public $bare = false;
-	public $lang = 'en';
-	private $site = '';
-	public $caption = '';
-	private $site_start = '';
 	private $mustext = array('css' => [], 'js' => [], 'all' => []); // Mandatory resources to include in all pages
 	protected $optext = array('css' => [], 'js' => [], 'all' => []); // Optional resources that can be added dynamically
 	protected $extpaths = array();
+	private $infix = array(); // Lazy variable injection parameters holder
 	protected $message = array(); // Prompt & Inline message queue << CARRY INLINE MESSAGES ALSO IN REDIRECT
 	protected $rendered = ''; // Variable to hold last generated / inserted text chunk to page temporarily 
 
-	public function __construct($pgen)
+	/**
+	 * Class construction method
+	 *
+	 * @param User $me // Dependency
+	 */
+	public function __construct(User $me, HTGen $ht) // ADD 'file'
 	{
-		$this->pgen = $pgen;
+		// Set dependencies
+		$this->di['me'] = $me;
+		$this->di['ht'] = $ht;
 
 		// Set basename
 		$this->site = conf('basename');
@@ -28,12 +31,11 @@ class page
 		// Set paths
 		foreach (['cache', 'template', 'language', 'favicon'] as $path) {
 			$p = $path . 'path';
-			$this->$p = syspath($path);
+			$this->$p = implode('/', explode('\\', syspath($path)));
 		}
 
 		// Set language
-		global $me;
-		$language = $me->pref('language'); // User preferred language
+		$language = $this->di['me']->pref('language'); // User preferred language
 		if (!$language && isset($_SERVER['HTTP_ACCEPT_LANGUAGE'])) $language = strtolower(explode('-', $_SERVER['HTTP_ACCEPT_LANGUAGE'])[0]); // Detected browser language
 		$lang_exists = array_map('basename', glob($this->languagepath . '*', GLOB_ONLYDIR)); // Get available language directory names
 		if (!$language || !in_array($language, $lang_exists)) $language = conf('language'); // Site default language
@@ -42,7 +44,7 @@ class page
 		$this->copyright = date('Y', $this->site_start) . ((date('Y', $this->site_start) !== date('Y')) ? ' - ' . date('Y') : '') . ' ' . $this->site . ' // ' . $this->lang('base', 'copyright');
 
 		// Set external resource & paths
-		$this->mustext = array('css' => ['normalize', 'awesome', 'flexgrid'], 'js' => ['jquery-3', 'plugin'], 'all' => ['base']); // TRY TO SOFTCODE THIS
+		$this->mustext = array('css' => ['normalize', 'awesome', 'flex', 'base'], 'js' => ['jquery-3', 'plugin', 'base'], 'all' => []); // TRY TO SOFTCODE THIS
 		$cacpext = $this->cachepath . md5(VRT);
 
 		if (file_exists($cacpext) && (time() - filemtime($cacpext)) > conf('dircache') * 60) unlink($cacpext); // Delete old cache
@@ -56,7 +58,7 @@ class page
 		}
 
 		$this->extpaths = include($cacpext);
-
+		
 		// Load unfired notifications
 		if (isset($_SESSION['message'])) {
 			$this->message['prompt'] = $_SESSION['message'];
@@ -64,10 +66,14 @@ class page
 		}
 	}
 
-	// Append additional external resource
-	public function setext(array $incl = array())
+	/**
+	 * Store additional external resources for including in page
+	 *
+	 * @param array $incl
+	 * @return bool
+	 */
+	public function setExt(array $incl = array())
 	{
-		// Include declared resources
 		if (!empty($incl) && array_depth($incl) == 2) {
 			$newext = array_merge_recursive($this->optext, $incl);
 
@@ -77,19 +83,57 @@ class page
 			$this->optext = $setext;
 			return true;
 		}
+		return false;
 	}
 
-	// External resource includes builder
-	private function makeInc($ext)
+	/**
+	 * Throw combined resources
+	 *
+	 * @param string $type
+	 * @return void
+	 */
+	public function spitExt(string $type = "css")
+	{
+		$content_type = $type == "css" ? "text/css" : "application/javascript";
+		//$callback = conf('compress_sourcecode', 'page') ? ["self", "compress_assets"] : null;
+		// Load compressed resources chunk
+		header("Content-type: $content_type; charset: UTF-8");
+		//ob_start($callback);
+		/*
+		if (conf('compress_sourcecode', 'page')) {
+			ob_start(function ($buffer) use ($type) {
+				return $this->compress_assets($buffer, $type);
+			});
+		} else {
+			ob_start();
+		}
+		 */
+		ob_start();
+		if (isset($_SESSION['resource'][$type]) && is_array($_SESSION['resource'][$type])) {
+			foreach ($_SESSION['resource'][$type] as $resource) include($resource);
+			unset($_SESSION['resource'][$type]);
+		}
+		if (empty($_SESSION['resource'])) unset($_SESSION['resource']);
+		ob_end_flush();
+		die();
+	}
+
+	/**
+	 * External resource includes builder
+	 *
+	 * @param array $ext
+	 * @param boolean $path_only
+	 * @return void
+	 */
+	private function makeInc(array $ext, bool $path_only = false)
 	{
 		foreach ($ext as $type => $grp) {
 			foreach ($grp as $name) {
 				$paths = $this->getPath($name, $type);
 				foreach ($paths as $v) {
-					if ($type === 'css') $links[] = $this->htag('link', '', ['type' => 'text/css', 'rel' => 'stylesheet', 'href' => $v]);
-					if ($type === 'js') $links[] = $this->htag('script', '', ['type' => 'text/javascript', 'src' => $v], 0);
-					//$links[] = $this->render('incl_'.$type,$v);
-					//$template .= $this->render('incl_'.$type,$v); // Don't include to page here, need to filter for duplicates
+					$v = str_replace('\\', '/', $v);
+					if ($type === 'css') $links[] = $path_only ? $v : $this->di['ht']->elem('link', '', ['type' => 'text/css', 'rel' => 'stylesheet', 'href' => $v]);
+					if ($type === 'js') $links[] = $path_only ? $v : $this->di['ht']->elem('script', '', ['type' => 'text/javascript', 'src' => $v], 0);
 				}
 			}
 		}
@@ -104,17 +148,16 @@ class page
 				}
 			}
 			$links = array_unique($links); // Filterout Duplicate Links
-			return implode('', $links);
+			return $path_only ? $links : implode('', $links);
 		}
 		return false;
 	}
 
-	// External resource path finder
+	// External resource path finder << MOVE TO FILE CLASS
 	private function getPath($name = '', $ext = '', $exact = 0)
 	{
 		$path = array();
 		foreach ($this->extpaths as $file) {
-			//$file = str_replace('\\', '/', $file);
 			$xact = $exact ? (basename($file, '.' . $ext) === $name) : (strpos(basename($file, '.' . $ext), $name) !== false);
 			if (is_file($file) && pathinfo($file, PATHINFO_EXTENSION) === $ext && $xact) {
 				$path[] = str_replace(VRT, '', $file);
@@ -126,25 +169,62 @@ class page
 		}
 		if (count($path) > 1) { // Multiple resources found, remove duplicates if any
 			foreach ($path as $node => $rez) {
-				//see($path);
-				//$dotext = (!empty($ext)) ? '.'.$ext : '';
-				if (in_array(pathinfo($rez, PATHINFO_DIRNAME) . DIRECTORY_SEPARATOR . pathinfo($rez, PATHINFO_FILENAME) . '.min.' . pathinfo($rez, PATHINFO_EXTENSION), $path)) unset($path[$node]); // Keep compressed only
+				$res_woext = pathinfo($rez, PATHINFO_DIRNAME) . DIRECTORY_SEPARATOR . pathinfo($rez, PATHINFO_FILENAME);
+				$res_ext = pathinfo($rez, PATHINFO_EXTENSION);
+				if (conf('compress_sourcecode', 'page')) {
+					if (in_array($res_woext . '.min.' . $res_ext, $path)) // Make sure compressed one exists
+					unset($path[$node]); // Keep compressed only
+				} else {
+					if (stripos($res_woext, '.min')) { // Assuming non compressed version available. CHECK???
+						unset($path[$node]);
+					}
+				}
 			}
 		}
 		return array_values($path);
 	}
 
-	// Add inline messages to show up in page
-	public function message($message = '', $type = 'error', $sticky = 0, $stay = 5, $render = 'prompt')
-	{ // Types are error, info, success (and dev: for inline only)
+	/**
+	 * Add messages to show up in page
+	 *
+	 * @param string $message
+	 * @param mixed $type
+	 * @param integer $appearance
+	 * @return bool
+	 */
+	public function message(string $message = '', $type = 'error', int $appearance = 5)
+	{
 		// No user input, sanitation not needed.
 		if (empty($message)) return false;
+
+		// Set default values
+		$render = 'prompt';
+		$sticky = 0;
+		$stay = $appearance;
+
+		// Types are error, info, success (and dev: for inline only)
 		if (is_numeric($type)) $type = ['error', 'success', 'info', 'dev'][$type];
+
+		if ($appearance < 0) {
+			$render = 'inline';
+		} else {
+			if ($type == 'dev') return false; // No dev mode for prompt message
+			if ($appearance == 0) {
+				$sticky = 1;
+			}
+		}
+
 		$this->message[$render][] = ($render === 'prompt') ? [$message, $type, $sticky, $stay] : [$message, $type];
 		return true;
 	}
 
-	// Handle the language variables
+	/**
+	 * Return text strings for the language variables
+	 *
+	 * @param mixed $file // The language file(s) required to obtain values from
+	 * @param mixed $var // The variables required to return values against
+	 * @return mixed // Return string for single value, array for multiple
+	 */
 	public function lang($file = 'base', $var = '')
 	{
 		if (empty($file)) {
@@ -173,41 +253,17 @@ class page
 		if (count($rtrn) === 1) $rtrn = reset($rtrn);
 		return ($rtrn);
 	}
-
-	// Programatic HTML Generator
-	public function htag($tag = 'br', $content = '', $arg = array(), $multiline = true, $xhtml = false)
-	{
-		$void_tag = ['area', 'base', 'br', 'col', 'hr', 'img', 'input', 'link', 'meta', 'param', 'command', 'keygen', 'source']; // HTML5 Compliant Void Tags
-		if (!empty($arg)) { // && !in_array($tag, ['br','hr']))
-			$decl = array();
-			foreach ($arg as $attrib => $value) {
-				if (is_array($value)) $value = implode(', ', $value);
-				if (is_numeric($attrib)) {
-					//$attrib = array_flip($attrib); Doesn't work, as value becomes 0
-					$attrib = $value;
-					$value = '';
-				}
-				$value = (!$value) ? '' : '="' . $value . '"';
-				$decl[] = $attrib . $value;
-			}
-			$decl = empty($decl) ? '' : ' ' . implode(' ', $decl);
-		}
-		if (in_array($tag, $void_tag)) {
-			$multiline = false; // Force oneline for void tags
-			$startclose = $content = '';
-			$endopen = $xhtml ? ' /' : ''; // XHTML compatibility, false by default
-		} else {
-			$startclose = '>';
-			$endopen = '</' . $tag;
-		}
-
-		$eol = $multiline ? PHP_EOL : '';
-		return '
-<' . $tag . $decl . $startclose . $content . $eol . $endopen . '>';
-	}
-
-	// Template based HTML Generator
-	public function render($template_name, array $vars = array(), array $lang = array(), array $ext = array())
+	
+	/**
+	 * Template based HTML Generator
+	 *
+	 * @param string $template_name
+	 * @param array $vars // Defined template variable values
+	 * @param array $lang // Language for loading variable values
+	 * @param array $ext // Required external resource files
+	 * @return void
+	 */
+	public function render(string $template_name, array $vars = array(), array $lang = array(), array $ext = array())
 	{
 		if (file_exists($this->templatepath . $template_name . '.tpl')) {
 			$template = file_get_contents($this->templatepath . $template_name . '.tpl');
@@ -229,8 +285,9 @@ class page
 				$template = str_replace('{{' . $key . '}}', $value, $template);
 			}
 
-			// Blankout all the unassigned variables
-			$template = preg_replace('/\\{{2}(.*?)\\}{2}/', '', $template);
+			// Blankout all the unassigned variables : not done here to support lazy value injection
+			//$template = preg_replace('/\\{{2}(.*?)\\}{2}/', '', $template);
+
 			// Include external resources
 			//if(is_array($ext) && !empty($ext)) $template .= $this->makeInc($ext); // Don't include upfront
 			if (is_array($ext) && !empty($ext)) $this->optext = array_unique(array_merge($ext, $this->optext)); // Append to include later at page build
@@ -239,14 +296,14 @@ class page
 			if (DEV) $vr['template_name'] = $template_name;
 			$template = $this->render('page_underdev', $vr)->get();
 		}
-		//return($template);
-		$this->rendered = '
+		$this->rendered = (conf('compress_sourcecode', 'page') && !DEV) ? $template : '
 <!-- ' . $template_name . ' : start -->' . PHP_EOL
 			. $template . PHP_EOL
 			. '<!-- ' . $template_name . ' : end -->' . PHP_EOL;
 
 		return $this;
 	}
+
 	// Manual code / text injection	to page
 	public function sketch($code = '')
 	{
@@ -254,16 +311,19 @@ class page
 		$this->rendered = $code;
 		return $this;
 	}
+
 	// Returns the rendered code, part of render() method chain
 	public function get()
 	{
 		return $this->rendered;
 	}
+
 	// Appends the code
 	public function append()
 	{
 		$this->html .= $this->rendered;
 	}
+
 	// Clean out previously queued code and add fresh
 	public function flush()
 	{
@@ -271,14 +331,30 @@ class page
 	}
 
 	// Navigation Builder
-	private function build_navigation()
+	private function buildNav()
 	{
-		//$link = $this->htag('ul',$this->htag('li',$this->htag('a', 'Play', ['href'=>'play'],0),[],0));
-		//return $this->htag('div',$this->htag('nav', $link),['id'=>'navigation']);
-		return $this->render('menu_struct')->get();
+		/*
+		$user_gid = 1;
+		$menu_items = $this->di['db']->table(conf('basename').'_action')->notWhere('permitted_gid', '>', $user_gid)->notWhere('icon', '')->getAll(); // Target icon to identify menu items, name can be created from action
+		foreach ($menu_items as $menu_item) {
+			$menu[$menu_item->parent_id][] = $menu_item;
+		}
+		echo '<pre style="text-align:left;">';
+		print_r($menu);
+		echo '</pre>';
+		//$link = $this->di['ht']->elem('ul',$this->di['ht']->elem('li',$this->di['ht']->elem('a', 'Play', ['href'=>'play'],0),[],0));
+		//return $this->di['ht']->elem('div',$this->di['ht']->elem('nav', $link),['id'=>'navigation']);
+		 */
+		$vars['username'] = isset($this->di['me']->name) ? $this->di['me']->name : 'Account';
+		return $this->render('menu_struct', $vars)->get();
 	}
 
-	// Page Forwarder
+	/**
+	 * Page Forwarder
+	 *
+	 * @param string $url
+	 * @return void
+	 */
 	public function redirect($url = '')
 	{
 		if (!strpos('+' . $url, PRT)) $url = PRT . $url; //prepend base url, also redirect to base url only if url is not provided
@@ -287,10 +363,75 @@ class page
 		exit();
 	}
 
-	// Generate final page to show in browser
-	public function out()
+	/**
+	 * Lazy value injector (allows to inject value of variable(s) even after rendering a template)
+	 *
+	 * @param array $expression
+	 * @return void
+	 */
+	public function infix(array $expression = [])
 	{
-	// Auto include external resources
+		if (empty($this->html)) return;
+
+		$expression = array_combine(array_map(function ($find) {
+			return '{{' . $find . '}}';
+		}, array_keys($expression)), $expression);
+		
+		// Hold the parameters to inject at the end
+		$this->infix = array_merge($this->infix, $expression);
+	}
+
+	/**
+	 * Final processing of rendered page code (output buffer callback)
+	 *
+	 * @param string $buffer
+	 * @return string
+	 */
+	private function finalizeCode(string $buffer)
+	{
+		// Lazy insert available variable assignments
+		$buffer = strtr($buffer, $this->infix);
+
+		// Blankout all the unassigned variables
+		$buffer = preg_replace('/\\{{2}(.*?)\\}{2}/', '', $buffer);
+
+		// Trim, white space and new lines removal, if required
+		return conf('compress_sourcecode', 'page') ? preg_replace('/\v(?:[\v\h]+)/', '', $buffer) : $buffer;
+	}
+
+	/**
+	 * Router encountered error page generator
+	 *
+	 * @param integer $code // The code corresponding identified error
+	 * @param string $request // Request string leading to the error
+	 * @return void
+	 */
+	public function error($code = 404, $request = "")
+	{
+		switch ((int)$code) {
+			case 503: // Service N/A. Found a better applicable code?
+				$msg = $this->lang('base', ['coding_page', 'under_dev', 'check_back']);
+				$this->message(sprintf(implode(' ', $msg), '"' . ucwords($request) . '"'), 'info');
+				$msg['template_name'] = sprintf($msg['coding_page'], '"' . ucwords($request) . '"');
+				$this->render('page_underdev', $msg)->flush();
+				break;
+
+			case 404:
+			default:
+				# code...
+				break;
+		}
+	}
+
+	/**
+	 * Generate final page to show in browser
+	 *
+	 * @param integer $pagegen // Script execution start moment, required for estimating page generation time
+	 * @return void
+	 */
+	public function out(int $pagegen = 0)
+	{
+		// Auto include external resources
 		$ext = include(ART . 'view/struct/declare_resource.php');
 		foreach ($ext as $type => $expression) {
 			foreach ($expression as $resource => $criteria) {
@@ -316,14 +457,16 @@ class page
 		$varh['title'] = $this->site;
 		if (!empty($this->name)) {
 			$pagename = include($this->languagepath . $this->lang . '/pagename.php');
-			$pagename = $pagename[strtolower($this->name)];
-			$varh['title'] .= empty($pagename) ? ' : ' . $this->name : ' : ' . $pagename;
+			$varh['title'] .= isset($pagename[strtolower($this->name)]) ? ' : ' . $pagename[strtolower($this->name)] : ' : ' . $this->name;
 		}
 
 		if (!$this->bare) {
 			// Build Menu / Navigation
 			$this->mustext['all'][] = 'nav';
-			$varhr['navigation'] = $this->build_navigation();
+			$varhr['name'] = conf('basename');
+			$varhr['caption'] = $this->caption;
+			$varhr['project_name'] = isset($_SESSION['project']['name']) ? $_SESSION['project']['name'] : $this->lang('base', ['project_na']);
+			$varhr['navigation'] = $this->buildNav();
 
 			// Generate the visible header
 			$varh['header'] = $this->render('page_header', $varhr)->get();
@@ -337,12 +480,19 @@ class page
 		foreach (['css', 'js'] as $reso) {
 			$incl[$reso] = array_unique(array_merge($this->mustext[$reso], $this->mustext['all'], $this->optext[$reso], $this->optext['all'])); // CHECK SEQUENCE
 		}
-
 		$inclcss['css'] = $incl['css'];
-		$vhi['include'] = $this->makeInc($inclcss);
+		$madeinc = $this->makeInc($inclcss, conf('combine_resource', 'page'));
+		if (conf('combine_resource', 'page')) {
+			$_SESSION['resource']['css'] = $madeinc;
+			$vhi['include'] = $this->di['ht']->elem('link', '', ['type' => 'text/css', 'rel' => 'stylesheet', 'href' => 'resource/css']);
+		} else {
+			$vhi['include'] = $madeinc;
+		}
+
 		$varh['include'] = $this->render('page_header_include', $vhi)->get();
 
-		// Throw final html to browser
+		ob_start(['self', 'finalizeCode']); // Start buffering
+
 		echo $this->render('page_head', $varh)->get();
 
 		// Report inline messages
@@ -350,28 +500,38 @@ class page
 			foreach ($this->message['inline'] as $message) { // FILTER DEV MESSAGES FROM GENERAL
 				$vmsg['msg'] = $message[0];
 				$vmsg['type'] = $message[1];
+				unset($message);
 				echo $this->render('inline_msg', $vmsg)->get();
 			}
 		}
-		echo $this->html . $this->htag('br');
+		echo $this->html . $this->di['ht']->elem('br');
 
 		// Throw prompt notifications
 		if (!empty($this->message['prompt'])) {
 			$message = $msg = '';
-			$this->message['prompt'] = array_unique($this->message['prompt']); // Remove duplicate messages, if any
+			$this->message['prompt'] = array_unique($this->message['prompt'], SORT_REGULAR); // Remove duplicate messages, if any
 			foreach ($this->message['prompt'] as $message) {
 				$msg .= '$.nok({message: \'' . $message[0] . '\',type: \'' . $message[1] . '\',sticky: ' . $message[2] . ',stay: ' . $message[3] . '});' . PHP_EOL;
 			}
 		}
-		if (!empty($msg))
-			$vhi['message'] = $this->htag('script', $msg, ['type' => 'text/javascript']); // Append the message script after initiating jQuery.
+		if (!empty($msg)) $vhi['message'] = $this->di['ht']->elem('script', $msg, ['type' => 'text/javascript']); // Append the message script after initiating jQuery.
 
 		// Create footer
 		$incljs['js'] = $incl['js'];
-		$vhi['include'] = $this->makeInc($incljs);
+		$madeinc = $this->makeInc($incljs, conf('combine_resource', 'page'));
+		if (conf('combine_resource', 'page')) {
+			$_SESSION['resource']['js'] = $madeinc;
+			$vhi['include'] = $this->di['ht']->elem('script', '', ['type' => 'text/javascript', 'src' => 'resource/js'], 0);
+		} else {
+			$vhi['include'] = $madeinc;
+		}
 		$varf['include'] = $this->render('page_footer_include', $vhi)->get();
 		echo $this->render('page_foot', $varf)->get();
 
-		//printf("Page created in %.6f seconds.", microtime(true)-$this->pgen); << WORKING. NEED TO PLACE SOMEWHERE
+		// Page generation time
+		//if ($pagegen > 0) printf("Page created in %.6f seconds.", microtime(true)-$pagegen); //<< WORKING. NEED TO PLACE SOMEWHERE SUITABLE
+
+		// Throw final html to browser
+		ob_end_flush();
 	}
 }
