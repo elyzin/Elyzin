@@ -1,4 +1,19 @@
 <?php
+/**
+ * Elyzin - PHP based free forum software
+ * 
+ * @since 0.1.0
+ * @version 0.1.0
+ * @package Model : Page
+ * @author Elyzin Devs <devs@elyz.in>
+ * @source https://github.com/elyzin/elyzin Base repository
+ * @link http://elyz.in
+ * @copyright 2018 Elyzin
+ * @license MIT
+ * 
+ * @todo Namespace
+ * @todo Interface
+ */
 
 class Page
 {
@@ -44,7 +59,7 @@ class Page
 		$this->copyright = date('Y', $this->site_start) . ((date('Y', $this->site_start) !== date('Y')) ? ' - ' . date('Y') : '') . ' ' . $this->site . ' // ' . $this->lang('base', 'copyright');
 
 		// Set external resource & paths
-		$this->mustext = array('css' => ['normalize', 'awesome', 'flex', 'base'], 'js' => ['jquery-3', 'plugin', 'base'], 'all' => []); // TRY TO SOFTCODE THIS
+		$this->mustext = array('css' => ['normalize', 'awesome', 'flex'], 'js' => ['jquery-3', 'plugin'], 'all' => ['base']); // TRY TO SOFTCODE THIS
 		$cacpext = $this->cachepath . md5(VRT);
 
 		if (file_exists($cacpext) && (time() - filemtime($cacpext)) > conf('dircache') * 60) unlink($cacpext); // Delete old cache
