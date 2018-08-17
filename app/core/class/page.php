@@ -480,7 +480,6 @@ class Page
 			$this->mustext['all'][] = 'nav';
 			$varhr['name'] = conf('basename');
 			$varhr['caption'] = $this->caption;
-			$varhr['project_name'] = isset($_SESSION['project']['name']) ? $_SESSION['project']['name'] : $this->lang('base', ['project_na']);
 			$varhr['navigation'] = $this->buildNav();
 
 			// Generate the visible header

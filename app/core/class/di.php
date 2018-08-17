@@ -25,7 +25,7 @@ class DI
 	 * @param      $abstract
 	 * @param null $concrete
 	 */
-	public function push($abstract, $concrete = null)
+	public function set($abstract, $concrete = null)
 	{
 		if ($concrete === null) {
 			$concrete = $abstract;
@@ -40,7 +40,7 @@ class DI
 	 * @return mixed|null|object
 	 * @throws Exception
 	 */
-	public function pull($abstract, $values = [])
+	public function get($abstract, $values = [])
 	{
 		// if we don't have it, just register it
 		if (!isset($this->instances[$abstract])) {
