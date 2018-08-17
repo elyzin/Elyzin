@@ -25,4 +25,5 @@ Thumbs.db
 # Generic git files
 *.orig
 
-# Package Helpers
+# Files not part of software
+app/vault

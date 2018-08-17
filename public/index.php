@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Elyzin - PHP based free forum software
  * 
@@ -31,26 +32,18 @@ if (empty($req[0])) $req[0] = 'landing'; // Load homepage in case of no paramete
 
 require_once(ART . 'core/func/site.php');
 
-// Error Handler
-if(DEV){
-	ini_set( "display_errors", "1" );
-	error_reporting( E_ALL & ~E_NOTICE );
-} else {
-	error_reporting( 0 );
-}
-
 // Start a new or resume existing session
 session_start();
-	
-$di 	= new DI();
-$me = $di->pull['user'];
-$page = $di->pull['page'];
+
+$di = new DI();
+$me = $di->get('User');
+$page = $di->get('Page');
 
 // Set timezone as per user preference
-if(!empty($me->pref('timezone'))){
+if (!empty($me->pref('timezone'))) {
 	$timezone = $me->pref('timezone');
-} elseif(isset($_COOKIE['timeoffset'])){ // Detected browser time zone. Cookie set by jquery in base.js
-	$timezone = timezone_name_from_abbr("", $_COOKIE['timeoffset']*60, false);
+} elseif (isset($_COOKIE['timeoffset'])) { // Detected browser time zone. Cookie set by jquery in base.js
+	$timezone = timezone_name_from_abbr("", $_COOKIE['timeoffset'] * 60, false);
 } else { // Load timezone from site configuration
 	$timezone = conf('timezone');
 }
