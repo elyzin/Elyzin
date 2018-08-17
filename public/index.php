@@ -41,16 +41,10 @@ if(DEV){
 
 // Start a new or resume existing session
 session_start();
-
-// Class autoloader
-spl_autoload_register(function($c){@include syspath('class').preg_replace('#\\\|_(?!.+\\\)#','/',$c).'.php';});
 	
-$db 	= new db();
-$me 	= new user();
-$clock 	= new clock();
-$file 	= new file();
-$log	= new log();
-$page 	= new page($pgen);
+$di 	= new DI();
+$me = $di->pull['user'];
+$page = $di->pull['page'];
 
 // Set timezone as per user preference
 if(!empty($me->pref('timezone'))){
@@ -84,4 +78,4 @@ if (file_exists(syspath('module') . $script . '.php')) {
 	$page->render('page_underdev', $msg)->flush();
 }
 // Template code gathered through script. Display final page
-$page->out();
+$page->out($pgen);
