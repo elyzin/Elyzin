@@ -1,0 +1,51 @@
+					<div class="matter">
+						<main class="col x12 s8 m9">
+							<form action="support/contact" method="post">
+								<div class="row">
+									<div class="col x12">
+										<h1>Contact Us</h1>
+									</div>
+									<div class="col x12 s6">
+										<label for="username">Your Name</label>
+										<input type="text" name="username" placeholder="John Doe" required />
+									</div>
+									<div class="col x12 s6">
+										<label for="email">Your email</label>
+										<input type="email" name="email" placeholder="john.doe@gmail.com" required />
+									</div>
+									<div class="col x12 s6">
+										<label for="subject">Subject</label>
+										<input type="text" name="subject" placeholder="Issue related to account" />
+									</div>
+									<div class="col x12 s6">
+										<label for="type">Message Type</label>
+										{{ contact_type }}
+									</div>
+									<div class="col x12">
+										<label for="message">Your Message</label>
+										<textarea name="message" placeholder="Here to let you know that ..." required></textarea>
+									</div>
+								</div>
+								<div class="row">
+									<div class="col x12 tmx trs">
+										<a class="button shx sns" href="//localhost/elyzin"><i class="mdi mdi-restart"></i> Go back</a> <button type="submit" class="button solid shx sns"><i class="mdi mdi-send"></i>&nbsp;Send Message</button>
+									</div>
+								</div>
+							</form>
+						</main>
+						<aside class="col x12 s4 m3">
+							<h3>Where We Are</h3>
+							<br>Project Office – MAFFFL<br>
+							Near Terminal 1A, Domestic Airport<br>
+							Santacruz (East)<br>
+							Mumbai-400099                         
+							<hr>
+							<h3>Other Locations</h3><br>
+							<ul>
+								<li><a href="support/faq">Frequently Asked</a></li>
+								<li><a href="support/ticket">Raise Ticket</a></li>
+								<li><a href="support/resource">Download Resources</a></li>
+								<li><a href="support/contact">Contact Us</a></li>
+							</ul>
+						</aside>
+					</div>

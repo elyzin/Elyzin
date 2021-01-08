@@ -1,74 +1,52 @@
 <?php
 
-/**
- * Elyzin - PHP based free forum software
- * 
- * @since 0.1.0
- * @version 0.1.0
- * @package Root file
- * @author Elyzin Devs <devs@elyz.in>
- * @source https://github.com/elyzin/elyzin Base repository
- * @link http://elyz.in
- * @copyright 2018 Elyzin
- * @license MIT
- * 
- * @todo Router
- */
-
-$pgen = microtime(true); // Page generation time start
-
-// Define site constants
-define('APP', 'elyzin');
-define('DEV', ($_SERVER['HTTP_HOST'] === 'localhost')); // Change as per your local server name
+define('INIT_TIME', microtime(true));
+define('STZ', date_default_timezone_get()); // Server Timezone
 define('DRT', dirname(__DIR__) . DIRECTORY_SEPARATOR); // Directory Root
 define('VRT', dirname(__FILE__) . DIRECTORY_SEPARATOR); // View Root (public)
-define('ART', DRT . 'app' . DIRECTORY_SEPARATOR); // Application Root
 define('PRT', '//' . preg_replace('/[\/]{2}/', '/', $_SERVER['HTTP_HOST'] . dirname(explode('index.php', $_SERVER['PHP_SELF'])[0]) . '/')); // Public web root
+define('STAKE', ['user', 'project', 'organization']);
 
-// Process url request at the first place
-$req = isset($_GET['req']) ? explode('/', strip_tags($_GET['req'])) : array();
-$req = preg_replace('/[^a-z0-9_.=-]/i', '', $req); // Basic unwanted character filter
-if (empty($req[0])) $req[0] = 'landing'; // Load homepage in case of no parameter defined
+error_reporting(E_ALL);
+ini_set("display_errors","On");
 
-require_once(ART . 'core/func/site.php');
+require DRT . 'vendor/autoload.php';
 
-// Start a new or resume existing session
+\Elyzin\Core\Config::init();
+
+// Initiate Error Handler
+Fallacy::init();
+
+// Setup Session
+$sessions_path = Config::path('sessions');
+File::makeDir($sessions_path);
+session_save_path($sessions_path);
 session_start();
 
-$di = new DI();
-$me = $di->get('User');
-$page = $di->get('Page');
-
-// Set timezone as per user preference
-if (!empty($me->pref('timezone'))) {
-	$timezone = $me->pref('timezone');
-} elseif (isset($_COOKIE['timeoffset'])) { // Detected browser time zone. Cookie set by jquery in base.js
-	$timezone = timezone_name_from_abbr("", $_COOKIE['timeoffset'] * 60, false);
-} else { // Load timezone from site configuration
-	$timezone = conf('timezone');
+define('INIT_SESSID', session_id());
+if (isset($_SESSION['time']) && time() - $_SESSION['time'] > getenv('SESSION_TIMEOUT') * 60) {
+    // Handle force logout on session timeout
+    session_regenerate_id(true); // change session ID for the current session and invalidate old session ID
 }
-date_default_timezone_set($timezone);
+$_SESSION['time'] = time();
 
-$valid_act = include(syspath('structure') . 'declare_action.php'); // Defined valid actions
+// Setup language
+if(!isset($_SESSION['lang'])) $_SESSION['lang'] = getenv('LANGUAGE'); // Set session value as per preference of user during login
 
-// Check strict login and redirect if necessary
-if (conf('strict_login', 'user') && !$me->id && (!in_array($req[1], ['login', 'recover']))) $page->redirect('account/login');
+$lang = new \i18n();
+$lang->setCachePath(Config::path('langcache'));
+$lang->setFilePath(Config::path('language', false)); // language file path
+$lang->setFallbackLang(getenv('LANGUAGE'));
+$lang->setPrefix('Lang'); // This is gonna be the usable class in global namespace
+$lang->setMergeFallback(true); // make keys available from the fallback language
+//$lang->setForcedLang('en'); // force english, even if another user language is available
+//$lang->setSectionSeparator('_');
+$lang->init();
 
-// Grab from available scripts, keeps users from requesting any file they want
-$script = array_key_exists($req[0], $valid_act) ? $req[0] : 'error';
-// Set page name, further customization to be done through conreollers
-$page->name = (!empty($req[1])) ? ucwords($req[1]) : ucwords($req[0]);
+//echo '<img src="'.Security::getTotpUri('effone', Security::getNewSecret()).'" />';
+//echo Security::makePass("Password");
 
-// Tracker, chatbox & bla bla staff goes here
 
-// Include the script to generate page
-if (file_exists(syspath('module') . $script . '.php')) {
-	include(syspath('module') . $script . '.php');
-} else { // Defined as valid act, but script not available
-	$msg = $page->lang('base', ['coding_page', 'under_dev', 'check_back']);
-	$page->message(sprintf(implode(' ', $msg), '"' . ucwords($script) . '"'), 'info');
-	$msg['template_name'] = sprintf($msg['coding_page'], '"' . ucwords($script) . '"');
-	$page->render('page_underdev', $msg)->flush();
-}
-// Template code gathered through script. Display final page
-$page->out($pgen);
+
+
+App::run();

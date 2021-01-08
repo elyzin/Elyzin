@@ -1,0 +1,13 @@
+$color-main: #005BA0;//#FF0F10;
+$color-alt: lighten($color-main, 10%);; //#FF6600;
+$color-sketch: black;
+$color-canvas: white;
+$color-text: lighten($color-sketch, 20%);
+$color-base: darken($color-canvas, 3%);
+$color-border: darken($color-canvas, 10%);
+$color-notice: (
+    error: #FF0F10,
+    dev: #888888,
+    success: #59d524,
+    info: #ffbb00
+);

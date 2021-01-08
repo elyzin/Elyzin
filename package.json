@@ -1,0 +1,6 @@
+{
+    "license": "MIT",
+    "dependencies": {
+        "destyle.css": "^1.0.15"
+    }
+}

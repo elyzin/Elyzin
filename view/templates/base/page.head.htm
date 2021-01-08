@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>{{ page_title }}</title>
+        <meta charset="utf-8">
+	    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+	    <meta name="description" content="elyzin">
+	    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+		<meta name="author" content="effone" />
+        <base href="{{ basename }}" target="_self">
+        {{ favicon }}
+        <link rel="stylesheet" href="//cdn.materialdesignicons.com/5.0.45/css/materialdesignicons.min.css">
+        {{ head_include }}
+    </head>
+    <body>
+        <script type="text/javascript">
+            $('body').prepend('<div id="loader" class="layer"><div class="spinner"></div></div>');$(function(){$('#loader').fadeOut('slow');});            
+        </script>
+        <div id="container">
+            {{ page_header }}
+            <div id="content">
+                <div class="frame">
+                {{ globalnotice }}

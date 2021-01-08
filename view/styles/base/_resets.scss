@@ -1,0 +1,25 @@
+/*@import 'normalize';
+@import 'form.reset';
+*/
+@import "destyle";
+
+html {
+    margin: 0;
+    padding: 0;
+}
+
+img[src*=svg] {
+    box-sizing: content-box;
+}
+
+input:-webkit-autofill {
+    -webkit-animation-name: autofill;
+    -webkit-animation-fill-mode: both;
+}
+
+@-webkit-keyframes autofill {
+    to {
+        color: lighten($color-text, 30%);
+        background: transparent;
+    }
+}

@@ -1,0 +1,69 @@
+<div class="row">
+    <main class="col x12 s8 m9">
+        {{ inline_error }}
+        <div class="matter">
+            <style type="text/css">
+                .draggable {
+                    cursor: move;
+                    /* fallback if grab cursor is unsupported */
+                    cursor: grab;
+                    cursor: -moz-grab;
+                    cursor: -webkit-grab;
+                }
+
+                /* (Optional) Apply a "closed-hand" cursor during drag operation. */
+                .draggable:active {
+                    cursor: grabbing;
+                    cursor: -moz-grabbing;
+                    cursor: -webkit-grabbing;
+                }
+            </style>
+            <input type="hidden" name="seq" value="PID-LCN-ISU-RCV-TYP-NUM">
+        </div>
+    </main>
+    <aside class="col x12 s4 m3">
+        <div>
+            <div class="matter">
+                <div class="row">
+                    <div class="col x12">
+                        <h3>Numbering Pattern:</h3>
+                    </div>
+                    <div class="col x12">
+                        <div id="draggable-container">
+                            <div class="no-select" data-tag="PID">Project Code</div>
+                            <div class="no-select draggable" data-tag="RCV">Receiver</div>
+                            <div class="no-select draggable" data-tag="LCN">Location</div>
+                            <div class="no-select draggable" data-tag="TYP">Type</div>
+                            <div class="no-select draggable" data-tag="ISU">Issuer</div>
+                            <div class="no-select" data-tag="NUM">Number-[Rev]</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </aside>
+    <script type="text/javascript">
+        $(function () {
+            var preq = $('input[name="seq"]').val().split("-"), elems = $('#draggable-container').children();
+
+            for (var i = 0; i < preq.length; i++) {
+                preq[i] = preq[i].replace(preq[i], $('div[data-tag="' + preq[i] + '"]').index());
+            }
+
+            $('#draggable-container').empty();
+
+            for (var i = 0; i < preq.length; i++) {
+                $('#draggable-container').append(elems[preq[i]]);
+            }
+
+            $('.draggable').arrangeable();
+            $('#draggable-container').on("drag.end.arrangeable", function () {
+                var sequence = [];
+                $('#draggable-container>div').each(function () {
+                    sequence.push($(this).attr('data-tag'));
+                });
+                $('input[name="seq"]').val(sequence.join("-"));
+            });
+        });
+    </script>
+</div>

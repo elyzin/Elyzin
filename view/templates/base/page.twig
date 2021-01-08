@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>{{ title }}</title>
+        {{ meta|raw }}
+        {{ favicon }}
+        {{ head_include }}
+        <link href="assets/styles/main.css" rel="stylesheet" type="text/css"/>
+    </head>
+    <body>
+        <div id="container">
+            <div id="header">
+                <ul id="navigation">
+                    {% for item in navigation %}
+                        <li>
+                            <a href="{{ item.href }}">{{ item.caption }}</a>
+                        </li>
+                    {% endfor %}
+                </ul>
+            </div>
+            <main>
+                <h2>Test Title</h2>
+                {{ a_variable }}
+            </main>
+            <div id="footer">
+                © 2020, Elyzin
+            </div>
+        </div>
+    </body>
+</html>

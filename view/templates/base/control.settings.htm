@@ -1,0 +1,86 @@
+<div class="row">
+    <main class="col x12 s8 m9">
+        {{ inline_error }}
+        <div class="matter">
+            <form action="control/settings" method="post">
+                <div class="row">
+                    <div class="col x12">
+                        <h3>Settings</h3>
+                    </div>
+                </div>
+                <div class="section-header"><span>Site Basics</span></div>
+                <div class="row">
+                    <div class="col x12 s6 m4">
+                        <label for="sitename">Site Name</label>
+                        <input type="text" name="sitename" placeholder="My Site" value="{{ sitename }}" />
+                    </div>
+                    <div class="col x12 s6 m4">
+                        <label for="sitemail">Site email</label>
+                        <input type="email" name="sitemail" placeholder="admin@site.com" value="{{ sitemail }}"
+                            required />
+                    </div>
+                    <div class="col x12 s6 m4">
+                        <label for="timezone">Timezone</label>
+                        {{ timezone }}
+                    </div>
+                    <div class="col x12 s6 m4">
+                        <label for="language">Language</label>
+                        {{ language }}
+                    </div>
+                    <div class="col x12 s6 m4">
+                        <label for="theme">Site Theme</label>
+                        {{ theme }}
+                    </div>
+                </div>
+
+                <div class="section-header"><span>Security</span></div>
+                <div class="row">
+                    <div class="col x12 s6 m4">
+                        <input type="checkbox" id="debug" name="debug" value="bool"{{ debug }}>
+                        <label for="debug">Enable Debugging</label><br>
+                        <input type="checkbox" id="min_asset" name="min_asset" value="bool"{{ min_asset }}>
+                        <label for="min_asset">Compress Codes and Assets</label>
+                    </div>
+                    <div class="col x12 s6 m4">
+                        <label for="samesite_cookie">SameSite Cookie Attribute</label>
+                        {{ samesite_cookie }}
+                    </div>
+                    <div class="col x12 s6 m4">
+                        <label for="session_timeout">Session Timeout (Mins)</label>
+                        <input type="number" id="session_timeout" name="session_timeout" min="10" max="120" step="5" value="{{ session_timeout }}">                        
+                    </div>
+                </div>
+
+                <div class="section-header"><span>Error Reporting</span></div>
+                <div class="row">
+                    <div class="col x12 s6 m4">
+                        <input type="checkbox" id="error_log" name="error_log" value="bool"{{ error_log }}>
+                        <label for="error_log">Log errors in file</label>
+                    </div>
+                    <div class="col x12 s6 m4">
+                        <input type="checkbox" id="error_screen" name="error_screen" value="bool"{{ error_screen }}>
+                        <label for="error_screen">Report errors on screen</label>
+                    </div>
+                    <div class="col x12 s6 m4">
+                        <input type="checkbox" id="error_mail" name="error_mail" value="bool"{{ error_mail }}>
+                        <label for="error_mail">Report errors through email</label>
+                    </div>
+                </div>
+                <div class="row foot">
+                    <div class="col x12 tmx trs">
+                        <a class="button shx sns" href="//localhost/elyzin/control"><i class="mdi mdi-restart"></i> Go
+                            Back</a> <button type="submit" class="button solid shx sns"><i
+                                class="mdi mdi-account-plus-outline"></i>&nbsp;Update Settings</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </main>
+    <aside class="col x12 s4 m3">
+        <div>
+            <div class="matter">
+                {{ env }}
+            </div>
+        </div>
+    </aside>
+    </div>

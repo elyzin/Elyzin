@@ -1,0 +1,46 @@
+<div class="row">
+	<main class="col x12 s8 m9">
+		{{ inline_error }}
+		<div class="matter">
+			<form action="control/create/user" method="post">
+				<div class="row">
+					<div class="col x12">
+						<h3>Create Organization</h3>
+					</div>
+					<div class="col x12 s6 m4">
+						<label for="fullname">Name</label>
+						<input type="text" name="fullname" placeholder="John Doe" value="{{ new_fullname }}" />
+					</div>
+					<div class="col x12 s6 m4">
+						<label for="username">Userame</label>
+						<input type="text" name="username" placeholder="john_doe" value="{{ new_username }}" required />
+					</div>
+					<div class="col x12 s6 m4">
+						<label for="email">email</label>
+						<input type="email" name="email" placeholder="john.doe@gmail.com" value="{{ new_email }}"
+							required />
+					</div>
+					<div class="col x12 s6 m4">
+						<label for="password">Password</label>
+						<input type="password" name="password" placeholder="******" value="{{ new_password }}"
+							required />
+					</div>
+				</div>
+				<div class="row foot">
+					<div class="col x12 tmx trs">
+						<a class="button shx sns" href="//localhost/elyzin/control"><i class="mdi mdi-restart"></i> Back</a> 
+						<button type="submit" class="button solid shx sns"><i class="mdi mdi-account-plus-outline"></i>&nbsp;Create</button>
+					</div>
+				</div>
+			</form>
+		</div>
+	</main>
+	<aside class="col x12 s4 m3">
+		<div>
+			<div class="matter">
+				<a class="button solid stretch" href="//localhost/elyzin/control/create/user"><i class="mdi mdi-account-plus-outline"></i> Create User</a>
+				<a class="button solid stretch" href="//localhost/elyzin/control/create/project"><i class="mdi mdi-account-plus-outline"></i> Create Project</a>
+			</div>
+		</div>
+	</aside>
+</div>
