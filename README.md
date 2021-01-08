@@ -1,2 +1,2 @@
 # elyzin
-A PHP based bulletin board with bare minimum dependency
+A PHP based experiment with uncertain future
